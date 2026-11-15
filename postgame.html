@@ -1,0 +1,581 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Post-game input summary</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+        font-family:
+          Segoe UI,
+          Arial,
+          sans-serif;
+        color: #f1f0f6;
+      }
+
+      #card {
+        position: absolute;
+        bottom: 52px;
+        left: calc((100vw - 1160px) / 2);
+        width: 1160px;
+        background: linear-gradient(125deg, rgba(19, 18, 28, 0.98), rgba(12, 13, 20, 0.97));
+        border: 1px solid #35313f;
+        border-radius: 14px;
+        box-shadow: 0 12px 45px #0008;
+        opacity: 0;
+        transform: translateY(22px);
+        transition:
+          opacity 0.3s,
+          transform 0.3s;
+        padding: 24px 26px 22px;
+      }
+      #card.visible {
+        opacity: 1;
+        transform: none;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 19px;
+      }
+      .icon {
+        width: 46px;
+        height: 46px;
+        border: 1px solid #645e78;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: #252332;
+        font-weight: 800;
+        font-size: 19px;
+        color: #c9baf4;
+      }
+      .heading {
+        flex: 1;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 25px;
+        font-weight: 700;
+      }
+      .sub {
+        font-size: 13px;
+        color: #aaa5b8;
+      }
+      .result {
+        text-align: right;
+      }
+      .badge {
+        font-size: 11px;
+        letter-spacing: 1.4px;
+        font-weight: 700;
+        color: #abefca;
+        border: 1px solid #40634e;
+        background: #17291f;
+        padding: 5px 10px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .kda {
+        font-size: 19px;
+        margin-top: 7px;
+        font-weight: 700;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 9px;
+      }
+      .metric {
+        background: #ffffff04;
+        border: 1px solid #ffffff0b;
+        border-radius: 5px;
+        text-align: center;
+        padding: 15px 5px 12px;
+      }
+      .value {
+        font-size: 27px;
+        font-weight: 750;
+        letter-spacing: -0.8px;
+      }
+      .label {
+        font-size: 11px;
+        letter-spacing: 1.4px;
+        color: #a59ab9;
+        margin-top: 5px;
+      }
+      .detail {
+        font-size: 10px;
+        color: #898294;
+        margin-top: 6px;
+      }
+      .footer {
+        margin-top: 13px;
+        display: flex;
+        justify-content: space-between;
+        color: #827b91;
+        font-size: 11px;
+      }
+      .bar {
+        position: absolute;
+        bottom: 0;
+        left: 14px;
+        right: 14px;
+        height: 2px;
+        background: #9983be;
+        transform-origin: left;
+      }
+
+      .key-counts {
+        margin-top: 15px;
+        padding-top: 12px;
+        border-top: 1px solid #ffffff13;
+      }
+      .key-counts .caption {
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        color: #a9bd9e;
+        margin-bottom: 8px;
+      }
+      .key-counts .chips {
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        gap: 5px;
+      }
+      .key-counts .chip {
+        display: flex;
+        justify-content: space-between;
+        background: #ffffff06;
+        border: 1px solid #ffffff0c;
+        border-radius: 4px;
+        padding: 5px 8px;
+        font-size: 11px;
+        color: #b3aebd;
+      }
+      .key-counts .chip strong {
+        color: #e1ecd8;
+      }
+
+      #card {
+        background: linear-gradient(135deg, #10272bf9, #07171df9);
+        border: 1px solid #927b45;
+        border-radius: 3px;
+        box-shadow:
+          inset 0 0 0 3px #071216,
+          inset 0 0 0 4px #a3894633,
+          0 12px 45px #0008;
+        color: #e3d9bd;
+      }
+      h1 {
+        font-family: Georgia, serif;
+        color: #e4cf99;
+      }
+      .icon {
+        border-radius: 2px;
+        border-color: #947d49;
+        background: #162d30;
+        color: #d8bf7b;
+      }
+      .metric {
+        border-color: #7b693e66;
+        border-radius: 2px;
+        background: linear-gradient(#10272b, #0a1b20);
+      }
+      .value {
+        color: #eee5ce;
+      }
+      .label,
+      .caption {
+        color: #c0aa73;
+      }
+      .detail,
+      .sub,
+      .footer {
+        color: #96a7a6;
+      }
+      .bar {
+        background: #bca263;
+      }
+      .key-counts {
+        border-top-color: #8d754344;
+      }
+      .key-counts .chip {
+        border-color: #7d6c4155;
+        background: #10272b;
+        border-radius: 2px;
+        color: #b2c0b9;
+      }
+      .key-counts .chip strong {
+        color: #ead8a8;
+      }
+      .maps {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .map-title {
+        color: #bda66c;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        margin-bottom: 7px;
+      }
+      .maps canvas {
+        display: block;
+        width: 100%;
+        height: 150px;
+        object-fit: contain;
+        background: #08171d;
+        border: 1px solid #7d6c4166;
+      }
+      .map-note {
+        font-size: 10px;
+        color: #93a7a5;
+        margin-top: 7px;
+      }
+
+      #card[data-game='valorant'] {
+        background: linear-gradient(115deg, #0f1923fc, #182832fa);
+        border: 1px solid #a8b9bb66;
+        border-left: 4px solid #ff4655;
+        border-radius: 0;
+        box-shadow: 0 12px 45px #0008;
+        color: #ece8e1;
+      }
+      #card[data-game='valorant'] h1 {
+        font-family:
+          Segoe UI,
+          Arial,
+          sans-serif;
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: #ece8e1;
+      }
+      #card[data-game='valorant'] .icon {
+        background: #ff4655;
+        color: #0f1923;
+        border-color: #ff4655;
+        border-radius: 0;
+      }
+      #card[data-game='valorant'] .metric {
+        background: #1e303a;
+        border-color: #c0cfcd2b;
+        border-radius: 0;
+        border-top: 2px solid #ece8e16b;
+      }
+      #card[data-game='valorant'] .value,
+      #card[data-game='valorant'] .key-counts .chip strong {
+        color: #ece8e1;
+      }
+      #card[data-game='valorant'] .label,
+      #card[data-game='valorant'] .map-title,
+      #card[data-game='valorant'] .key-counts .caption {
+        color: #c9d4d0;
+      }
+      #card[data-game='valorant'] .detail,
+      #card[data-game='valorant'] .sub,
+      #card[data-game='valorant'] .footer,
+      #card[data-game='valorant'] .map-note {
+        color: #a9bbbd;
+      }
+      #card[data-game='valorant'] .badge {
+        border-color: #ff4655;
+        background: #ff46551a;
+        color: #ff8991;
+        border-radius: 0;
+      }
+      #card[data-game='valorant'] .key-counts {
+        border-color: #c0cfcd2b;
+      }
+      #card[data-game='valorant'] .key-counts .chip {
+        background: #1e303a;
+        border-color: #c0cfcd2b;
+        border-radius: 0;
+        color: #b7c7c8;
+      }
+      #card[data-game='valorant'] .maps canvas {
+        background: #0f1923;
+        border-color: #c0cfcd2b;
+      }
+      #card[data-game='valorant'] .bar {
+        background: #ff4655;
+      }
+    </style>
+  </head>
+  <body>
+    <section id="card">
+      <header>
+        <div class="icon" id="icon"></div>
+        <div class="heading">
+          <h1 id="title"></h1>
+          <div class="sub" id="subtitle"></div>
+        </div>
+        <div class="result">
+          <span class="badge" id="status"></span>
+          <div class="kda" id="kda"></div>
+        </div>
+      </header>
+      <div class="grid" id="metrics"></div>
+      <div class="maps">
+        <div>
+          <div class="map-title">MOUSE PATH · YELLOW LEFT / BLUE RIGHT</div>
+          <canvas id="pathmap" width="640" height="360"></canvas>
+        </div>
+        <div>
+          <div class="map-title">ACTIVITY HEATMAP</div>
+          <canvas id="heatmap" width="640" height="360"></canvas>
+        </div>
+      </div>
+      <div class="map-note">
+        Sampled screen coordinates · View and switch maps at 127.0.0.1:17843/review.html
+      </div>
+      <div class="footer"><span id="note"></span><span>INPUT SUMMARY · POST GAME</span></div>
+      <div class="bar" id="bar"></div>
+    </section>
+
+    <script src="/path-map.js"></script>
+    <script>
+      const onlyGame = new URLSearchParams(location.search).get('only');
+      const card = document.getElementById('card'),
+        metrics = document.getElementById('metrics');
+      let expires = 0,
+        shownAt = 0,
+        currentId = null;
+
+      const text = (id, value) => (document.getElementById(id).textContent = value);
+
+      const duration = (s) =>
+        `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+      function show(summary) {
+        if (onlyGame && summary?.game !== onlyGame) {
+          card.classList.remove('visible');
+          return;
+        }
+
+        if (!summary || summary.expiresAt <= Date.now()) {
+          card.classList.remove('visible');
+          return;
+        }
+
+        if (summary.id === currentId) return;
+
+        card.dataset.game = summary.game;
+        currentId = summary.id;
+        expires = summary.expiresAt;
+        shownAt = Date.now();
+
+        const game = summary.game === 'league' ? 'League of Legends' : 'VALORANT';
+
+        text('icon', summary.game === 'league' ? 'L' : 'V');
+        text('title', summary.champion ? `${summary.champion} · ${game}` : game);
+
+        text(
+          'subtitle',
+          `${summary.preview ? 'PREVIEW · SAMPLE DATA · ' : ''}${summary.partial ? 'PARTIAL CAPTURE · ' : ''}${duration(summary.durationSeconds)} captured · ${new Date(summary.endedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+        );
+
+        text('status', summary.status || 'MATCH COMPLETE');
+        text('kda', summary.kda || '');
+
+        const data = [
+          [summary.apm.toFixed(1), 'APM', 'Clicks + key presses / minute'],
+
+          [
+            (summary.travelPixels / 1000).toFixed(1) + 'k px',
+            'CURSOR TRAVEL',
+            'On-screen distance',
+          ],
+
+          [
+            summary.efficiency === null ? '—' : summary.efficiency.toFixed(0) + '%',
+            'EFFICIENCY',
+            summary.spreadPixels === null
+              ? 'Needs two moving clicks'
+              : `Spread: ${summary.spreadPixels.toFixed(0)} px`,
+          ],
+
+          [
+            summary.clicks.toLocaleString(),
+            'CLICKS',
+            `${summary.keys.toLocaleString()} key presses`,
+          ],
+
+          [summary.tempoHz.toFixed(1) + ' Hz', 'CLICK TEMPO', 'Clicks / second'],
+
+          [Math.round(summary.idleSeconds) + 's', 'IDLE', 'Gaps beyond 1 second'],
+        ];
+
+        metrics.replaceChildren();
+        for (const [value, label, detail] of data) {
+          const tile = document.createElement('div');
+          tile.className = 'metric';
+          for (const [cls, t] of [
+            ['value', value],
+            ['label', label],
+            ['detail', detail],
+          ]) {
+            const el = document.createElement('div');
+            el.className = cls;
+            el.textContent = t;
+            tile.append(el);
+          }
+          metrics.append(tile);
+        }
+
+        let keyCounts = document.getElementById('key-counts');
+
+        if (!keyCounts) {
+          keyCounts = document.createElement('div');
+          keyCounts.id = 'key-counts';
+          keyCounts.className = 'key-counts';
+          metrics.after(keyCounts);
+        }
+
+        keyCounts.replaceChildren();
+        keyCounts.hidden = !summary.keyCounts;
+
+        if (summary.keyCounts) {
+          const caption = document.createElement('div');
+          caption.className = 'caption';
+          caption.textContent = 'KEY PRESSES · HELD-KEY REPEATS EXCLUDED';
+          keyCounts.append(caption);
+          const chips = document.createElement('div');
+          chips.className = 'chips';
+          for (const key of summary.game === 'valorant'
+            ? [
+                'W',
+                'A',
+                'S',
+                'D',
+                'Q',
+                'E',
+                'C',
+                'X',
+                'F',
+                'R',
+                'B',
+                '1',
+                '2',
+                '3',
+                '4',
+                'Ctrl',
+                'Shift',
+                'Space',
+                'Tab',
+                '~',
+                'V',
+              ]
+            : [
+                'Q',
+                'W',
+                'E',
+                'R',
+                'D',
+                'F',
+                'Ctrl',
+                'Shift',
+                'Space',
+                '1',
+                '2',
+                '3',
+                '4',
+                '5',
+                '6',
+                '7',
+                'V',
+              ]) {
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            const label = document.createElement('span');
+            label.textContent = key;
+            const count = document.createElement('strong');
+            count.textContent = summary.keyCounts[key] || 0;
+            chip.append(label, count);
+            chips.append(chip);
+          }
+          keyCounts.append(chips);
+        }
+
+        drawPointerMap(document.getElementById('pathmap'), summary.pointerMap, 'path');
+        drawPointerMap(document.getElementById('heatmap'), summary.pointerMap, 'heatmap');
+
+        text(
+          'note',
+          summary.game === 'valorant'
+            ? 'Cursor statistics measure screen position, not raw aim movement.'
+            : 'Measured locally · Cursor path efficiency between clicks',
+        );
+        card.classList.add('visible');
+      }
+
+      const preview = new URLSearchParams(location.search).has('preview');
+
+      if (preview) {
+        show({
+          id: 'preview',
+          preview: true,
+          game:
+            new URLSearchParams(location.search).get('game') === 'valorant' ? 'valorant' : 'league',
+          champion: null,
+          kda: null,
+          status: 'SAMPLE SUMMARY',
+          durationSeconds: 1860,
+          endedAt: Date.now(),
+          expiresAt: Date.now() + 3600000,
+          apm: 293.6,
+          travelPixels: 496200,
+          efficiency: 51,
+          spreadPixels: 261,
+          clicks: 3895,
+          keys: 5207,
+          tempoHz: 2.1,
+          idleSeconds: 5,
+          pointerMap: samplePointerMap(),
+          keyCounts: {
+            Q: 242,
+            W: 113,
+            E: 164,
+            R: 18,
+            D: 6,
+            F: 5,
+            Ctrl: 54,
+            Shift: 34,
+            Space: 510,
+            1: 9,
+            2: 12,
+            4: 31,
+            V: 22,
+          },
+        });
+      } else {
+        const stream = new EventSource('/summary-events');
+        stream.onmessage = (e) => show(JSON.parse(e.data));
+        stream.onerror = () => card.classList.remove('visible');
+      }
+
+      function frame() {
+        const remaining = Math.max(0, expires - Date.now());
+        if (!remaining) card.classList.remove('visible');
+        document.getElementById('bar').style.transform =
+          `scaleX(${Math.min(1, remaining / Math.max(1, expires - shownAt))})`;
+        if (remaining > 0) requestAnimationFrame(frame);
+        else setTimeout(frame, 500);
+      }
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

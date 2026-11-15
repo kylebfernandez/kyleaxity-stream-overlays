@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Game keyboard and mouse display</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 152px;
+        overflow: hidden;
+        background: transparent;
+        font-family:
+          Segoe UI,
+          Arial,
+          sans-serif;
+      }
+
+      #board {
+        border: 1px solid #526b50;
+        opacity: 0;
+        transition: opacity 0.12s;
+      }
+
+      #board.visible {
+        opacity: 1;
+      }
+
+      .row {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+
+      .row:last-child {
+        margin-bottom: 0;
+      }
+
+      .key {
+        position: relative;
+        height: 35px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #677a5d;
+        border-bottom: 4px solid #253625;
+        font-size: 14px;
+        font-weight: 600;
+        transition:
+          background 0.06s,
+          color 0.06s;
+      }
+
+      .key.down {
+        color: #12241a;
+        border-bottom-color: #506c42;
+        box-shadow: inset 0 1px 0 #c8d9b744;
+      }
+
+      .space {
+        height: 31px;
+        font-size: 11px;
+        letter-spacing: 2px;
+      }
+
+      .modifier {
+        height: 31px;
+        font-size: 11px;
+      }
+
+      .item {
+        height: 35px;
+        font-size: 12px;
+      }
+
+      .spell-image {
+        width: 29px;
+        height: 27px;
+        object-fit: cover;
+        border-radius: 3px;
+        filter: brightness(0.8) saturate(0.8);
+      }
+
+      .down .spell-image {
+        filter: brightness(0.95) saturate(0.95);
+      }
+
+      .spell-letter {
+        position: absolute;
+        top: 2px;
+        left: 3px;
+        font-size: 9px;
+        line-height: 12px;
+        font-weight: 700;
+        padding: 0 2px;
+        border-radius: 2px;
+        background: #213025e8;
+        color: #e2ebda;
+      }
+
+      .key.has-spell {
+        padding-left: 5px;
+      }
+
+      .press-count {
+        position: absolute;
+        bottom: 1px;
+        right: 3px;
+        padding: 0 2px;
+        border-radius: 2px;
+        background: #17251ddd;
+        color: #adc3a0;
+        font-size: 8px;
+        line-height: 10px;
+        letter-spacing: 0;
+        font-weight: 500;
+      }
+
+      .down .press-count {
+        color: #e0ecd7;
+      }
+
+      #board {
+        padding: 9px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      #keyboard {
+        width: 338px;
+        flex: none;
+      }
+
+      .key {
+        width: 43px;
+      }
+
+      .row.abilities .key {
+        width: auto;
+        min-width: 0;
+        flex: 1;
+      }
+
+      .gap {
+        width: 7px;
+        flex: none;
+      }
+
+      .modifier {
+        width: 53px;
+        flex: none;
+      }
+
+      .shift {
+        width: 58px;
+      }
+
+      .space {
+        width: 215px;
+        flex: none;
+      }
+
+      #mouse {
+        flex: none;
+        width: 62px;
+        height: 113px;
+        border: 1px solid #61775b;
+        border-bottom: 4px solid #1d3021;
+        border-radius: 20px 20px 24px 24px;
+        background: linear-gradient(#40513d, #263b2d);
+        box-shadow: inset 0 1px 0 #72876c66;
+      }
+
+      .mouse-button {
+        position: absolute;
+        top: 5px;
+        width: 25px;
+        height: 46px;
+        border: 1px solid #687b60;
+        border-bottom: 3px solid #253625;
+        background: linear-gradient(#566650, #3c4c3b);
+        color: #c8d5bd;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 6px;
+        font-size: 9px;
+        transition: background 0.04s;
+      }
+
+      .mouse-left {
+        left: 3px;
+        border-radius: 15px 3px 4px 4px;
+      }
+
+      .mouse-right {
+        right: 3px;
+        border-radius: 3px 15px 4px 4px;
+      }
+
+      .mouse-left.down {
+        background: #d4db70;
+        border-color: #e2e8a4;
+        color: #30350e;
+      }
+
+      .mouse-right.down {
+        background: #6cb8ff;
+        border-color: #a4d3ff;
+        color: #102d47;
+      }
+
+      .wheel {
+        position: absolute;
+        top: 12px;
+        left: 26px;
+        width: 8px;
+        height: 17px;
+        background: #a1b393;
+        border: 2px solid #263b2d;
+        border-radius: 4px;
+      }
+
+      .wheel.down {
+        background: #d3e7bf;
+        border-color: #8fad76;
+      }
+
+      .mouse-side {
+        position: absolute;
+        border: 1px solid #718466;
+        border-bottom: 2px solid #253625;
+        background: #43573f;
+        transition: background 0.04s;
+      }
+
+      .mouse-side.down {
+        background: #b5d995;
+        border-color: #d0e5bc;
+      }
+
+      html,
+      body {
+        width: 478px;
+      }
+
+      #board {
+        width: 478px;
+      }
+
+      #mouse-pad {
+        position: relative;
+        width: 110px;
+        height: 113px;
+        flex: none;
+        overflow: hidden;
+        border: 1px solid #526b504d;
+        border-radius: 9px;
+        background: radial-gradient(ellipse, #526b5022, transparent 75%);
+      }
+
+      #mouse {
+        position: absolute;
+        left: 23px;
+        top: 0;
+        transform: translate(0px, 0px) scale(0.8);
+        will-change: transform;
+      }
+
+      .mouse-side {
+        left: -4px;
+        width: 8px;
+        height: 22px;
+        border-radius: 5px;
+      }
+
+      .mouse-side.first {
+        top: 77px;
+      }
+
+      .mouse-side.second {
+        top: 51px;
+      }
+
+      #board {
+        border-color: #7d6c41;
+        border-radius: 3px;
+        background: linear-gradient(135deg, #142a29f5, #07171df5);
+        box-shadow:
+          inset 0 0 0 2px #080f12,
+          inset 0 0 0 3px #88703b55;
+      }
+
+      .key {
+        border-color: #71623e;
+        border-bottom-color: #1b2826;
+        border-radius: 2px;
+        background: linear-gradient(#344840, #1c302d);
+        color: #d4c9a5;
+      }
+
+      .key.down {
+        background: linear-gradient(#88a36b, #59794e);
+        border-color: #c4ae6e;
+      }
+
+      .row.valorant-row .key {
+        flex: 1;
+        min-width: 0;
+        font-size: 11px;
+      }
+
+      .row.valorant-row .val-space {
+        flex: 3;
+      }
+
+      .row.valorant-row:last-child .key {
+        height: 31px;
+      }
+
+      #board[data-game='valorant'] {
+        border-color: #75868b;
+      }
+
+      #board[data-game='valorant'] {
+        background: linear-gradient(115deg, #0f1923f5, #172631f5);
+        border: 1px solid #86959a70;
+        border-left: 3px solid #ff4655;
+        border-radius: 0;
+        box-shadow: inset 0 1px 0 #ece8e118;
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%);
+        padding-left: 7px;
+      }
+
+      #board[data-game='valorant'] .key {
+        border: 1px solid #bac5c344;
+        border-bottom: 3px solid #050c12;
+        border-radius: 0;
+        background: linear-gradient(#293943, #1c2b35);
+        color: #ece8e1;
+        font-weight: 700;
+        box-shadow: none;
+      }
+
+      #board[data-game='valorant'] .key.down {
+        background: #ece8e1;
+        color: #0f1923;
+        border-color: #ece8e1;
+        border-bottom-color: #ff4655;
+        box-shadow: inset 0 -2px 0 #ff4655;
+      }
+
+      #board[data-game='valorant'] #mouse {
+        border-bottom-color: #071019;
+      }
+
+      #board[data-game='valorant'] .mouse-button:not(.down) {
+        background: linear-gradient(#3c4b54, #263740);
+        border-color: #9aabaf70;
+        border-bottom-color: #0a141d;
+        color: #ece8e1;
+      }
+
+      #board[data-game='valorant'] .mouse-side {
+        border-color: #879c9f;
+        background: #3c4d57;
+        border-bottom-color: #0a141d;
+      }
+
+      #board[data-game='valorant'] .mouse-side.down,
+      #board[data-game='valorant'] .wheel.down {
+        background: #ece8e1;
+        border-color: #ff4655;
+      }
+
+      #board[data-game='valorant'] .wheel:not(.down) {
+        background: #b2c1c0;
+        border-color: #172731;
+      }
+
+      .row.valorant-row {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+      }
+
+      .row.valorant-row .key {
+        width: auto;
+      }
+
+      .row.valorant-row .val-space {
+        grid-column: span 4;
+      }
+
+      #board[data-game='valorant'] {
+        height: 220px;
+        align-items: center;
+        --mouse-scale: 0.65;
+      }
+
+      #board[data-game='valorant'] .valorant-row {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      #board[data-game='valorant'] .valorant-row:last-child {
+        margin-bottom: 0;
+      }
+
+      #board[data-game='valorant'] .valorant-row .key {
+        height: 60px;
+        font-size: 13px;
+      }
+
+      #board[data-game='valorant'] .valorant-row .val-space {
+        grid-column: span 2;
+      }
+
+      #board[data-game='valorant'] .spell-image {
+        object-fit: contain;
+        filter: brightness(0.95);
+        opacity: 0.9;
+      }
+
+      #board[data-game='valorant'] .down .spell-image {
+        filter: brightness(0);
+        opacity: 0.8;
+      }
+
+      #board[data-game='valorant'] .spell-letter {
+        background: #0f1923d9;
+        color: #ece8e1;
+        top: 2px;
+        left: 3px;
+        font-size: 10px;
+      }
+
+      #board[data-game='valorant'] .key.has-spell {
+        padding-left: 0;
+      }
+
+      #board[data-game='valorant'] #mouse-pad {
+        border-color: #a6bec64d;
+        border-top: 2px solid #ff4655;
+      }
+
+      #board[data-game='valorant'] #mouse {
+        height: 113px;
+        transform: translate(0px, 0px) scale(var(--mouse-scale));
+        box-shadow: 0 4px 14px #0005;
+      }
+
+      #board[data-game='valorant'] .mouse-button {
+        height: 48px;
+        font-size: 10px;
+      }
+
+      #board[data-game='valorant'] .wheel {
+        width: 9px;
+      }
+
+      #board[data-game='valorant'] #keyboard {
+        display: grid;
+      }
+
+      #board[data-game='valorant'] #keyboard .key {
+        width: auto;
+        min-width: 0;
+      }
+
+      #board[data-game='valorant'] .val-skills {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0;
+        border: 1px solid #91a4aa77;
+      }
+
+      #board[data-game='valorant'] #keyboard .val-skills .key {
+        border-top: 0;
+        border-left: 0;
+        border-right: 1px solid #91a4aa44;
+      }
+
+      #board[data-game='valorant'] #keyboard .val-skills .key:last-child {
+        border-right: 0;
+      }
+
+      #board[data-game='valorant'] #keyboard {
+        grid-template-rows: repeat(5, 35px);
+        gap: 6px;
+        height: 199px;
+      }
+
+      #board[data-game='valorant'] #keyboard .key {
+        height: 35px;
+        font-size: 11px;
+      }
+
+      #board[data-game='valorant'] .val-skills {
+        grid-row: 5;
+      }
+
+      #board[data-game='valorant'] #keyboard .val-skills .key {
+        height: 33px;
+      }
+
+      #board[data-game='valorant'] .spell-image {
+        width: 26px;
+        height: 26px;
+      }
+
+      #board[data-game='valorant'] #keyboard {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      #board[data-game='valorant'] .val-skills {
+        grid-column: 1 / span 4;
+      }
+
+      .wheel-scroll {
+        position: absolute;
+        left: 24px;
+        width: 12px;
+        height: 10px;
+        font-size: 11px;
+        line-height: 10px;
+        text-align: center;
+        color: #8da6a8;
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .scroll-up {
+        top: 0;
+      }
+
+      .scroll-down {
+        top: 31px;
+      }
+
+      .wheel-scroll.active {
+        opacity: 1;
+        color: #eff7eb;
+        text-shadow: 0 0 5px #c4e2b3;
+      }
+
+      #board[data-game='valorant'] .wheel-scroll.active {
+        color: #fff;
+        text-shadow:
+          0 0 5px #ff4655,
+          0 0 2px #ff4655;
+      }
+
+      .wheel.scrolling {
+        box-shadow: 0 0 0 1px #e6ebdf;
+        background: #ced9ce;
+      }
+
+      #board[data-game='valorant'] .wheel.scrolling {
+        box-shadow: 0 0 0 1px #ff4655;
+        background: #ece8e1;
+      }
+
+      #board[data-game='valorant'] #keyboard {
+        width: 250px;
+      }
+
+      .mouse-honeycomb {
+        display: none;
+        position: absolute;
+        left: 5px;
+        top: 55px;
+        width: calc(100% - 10px);
+        height: calc(100% - 61px);
+        pointer-events: none;
+      }
+
+      #board[data-game='valorant'] {
+        width: 530px;
+      }
+
+      #board[data-game='valorant'] #mouse-pad {
+        width: 250px;
+      }
+
+      #board[data-game='valorant'] #mouse {
+        background: linear-gradient(160deg, #263943, #142530);
+        border-color: #b0c1c4;
+      }
+
+      #board[data-game='valorant'] .mouse-honeycomb {
+        display: block;
+        opacity: 0.95;
+      }
+
+      #board[data-game='valorant'] #mouse::after {
+        content: '';
+        position: absolute;
+        left: 17px;
+        right: 17px;
+        bottom: 3px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #ff6976, transparent);
+        pointer-events: none;
+      }
+
+      #board[data-game='valorant'] #mouse-pad {
+        height: 200px;
+        padding: 0;
+        overflow: visible;
+      }
+
+      #board[data-game='valorant'] #mouse {
+        width: 68px;
+        left: calc(50% - 34px);
+        top: calc(50% - 56.5px);
+        border-radius: 18px 18px 25px 25px;
+      }
+
+      #board[data-game='valorant'] .mouse-button {
+        width: 28px;
+      }
+
+      #board[data-game='valorant'] .wheel {
+        left: 29px;
+      }
+
+      #board[data-game='valorant'] .wheel-scroll {
+        left: 27.5px;
+      }
+
+      #board[data-game='valorant'] #mouse-pad {
+        border: 1px solid #70858d55;
+        border-radius: 10px;
+        background:
+          repeating-linear-gradient(35deg, transparent 0 2px, #91a9af08 2px 3px),
+          repeating-linear-gradient(125deg, transparent 0 2px, #00000018 2px 3px),
+          radial-gradient(ellipse at 40% 30%, #20343f, #0c1922 85%);
+        box-shadow:
+          inset 0 1px 0 #aec5ca22,
+          inset 0 -3px 6px #0005,
+          0 2px 4px #0004;
+        isolation: isolate;
+      }
+
+      #board[data-game='valorant'] #mouse-pad::before {
+        content: '';
+        position: absolute;
+        inset: 5px;
+        border: 1px dashed #9ab1b43d;
+        border-radius: 6px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      #board[data-game='valorant'] #mouse-pad::after {
+        content: 'KYLEAXITY';
+        position: absolute;
+        right: 13px;
+        bottom: 12px;
+        color: #b3c7ca55;
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #ff465573;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      #board[data-game='valorant'] #mouse {
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board" aria-label="Game keyboard and mouse input">
+      <div id="keyboard">
+        <div class="row" id="items"></div>
+        <div class="row abilities" id="abilities"></div>
+        <div class="row">
+          <div class="key modifier" data-key="Ctrl">CTRL</div>
+          <div class="key modifier shift" data-key="Shift">SHIFT</div>
+          <div class="key space" data-key="Space">SPACE</div>
+        </div>
+      </div>
+      <div id="mouse-pad" aria-label="Mouse movement area">
+        <aside id="mouse" aria-label="Mouse click indicators">
+          <svg
+            class="mouse-honeycomb"
+            viewBox="0 0 74 52"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <pattern id="aula-honeycomb" width="16" height="14" patternUnits="userSpaceOnUse">
+                <path
+                  d="M8 1 L14 4.5 V10.5 L8 14 L2 10.5 V4.5 Z"
+                  fill="#061018"
+                  stroke="#8ba4ad"
+                  stroke-width="1.1"
+                />
+              </pattern>
+              <clipPath id="aula-shell-clip">
+                <path d="M2 0 H72 V23 Q72 50 37 50 Q2 50 2 23 Z" />
+              </clipPath>
+            </defs>
+            <rect
+              width="74"
+              height="52"
+              fill="url(#aula-honeycomb)"
+              clip-path="url(#aula-shell-clip)"
+            />
+          </svg>
+          <div class="mouse-button mouse-left" id="mouse-left" aria-label="Left click"></div>
+          <div class="mouse-button mouse-right" id="mouse-right" aria-label="Right click"></div>
+          <div class="wheel-scroll scroll-up" id="mouse-scroll-up" aria-label="Scroll up">▲</div>
+          <div class="wheel" id="mouse-middle" title="Wheel click"></div>
+          <div class="wheel-scroll scroll-down" id="mouse-scroll-down" aria-label="Scroll down">
+            ▼
+          </div>
+          <div
+            class="mouse-side first"
+            id="mouse-side-one"
+            title="Back thumb button (Mouse 4)"
+          ></div>
+          <div
+            class="mouse-side second"
+            id="mouse-side-two"
+            title="Forward thumb button (Mouse 5)"
+          ></div>
+        </aside>
+      </div>
+    </div>
+    <script>
+      const board = document.getElementById('board');
+      let useRawMouse = false;
+      const onlyGame = new URLSearchParams(location.search).get('only');
+
+      let displayGame = 'league';
+      const leagueMarkup = document.getElementById('keyboard').innerHTML;
+
+      function setGame(game) {
+        if (displayGame === game) return;
+        displayGame = game;
+        board.dataset.game = game;
+        document.documentElement.style.width = game === 'valorant' ? '530px' : '478px';
+        document.body.style.width = game === 'valorant' ? '530px' : '478px';
+        document.documentElement.style.height = game === 'valorant' ? '240px' : '152px';
+        document.body.style.height = game === 'valorant' ? '240px' : '152px';
+        if (game === 'valorant') {
+          targetY = Math.max(-55, Math.min(55, targetY));
+          motionY = Math.max(-55, Math.min(55, motionY));
+        }
+        mouseGraphic.style.transform = `translate(${motionX}px,${motionY}px) scale(var(--mouse-scale,.8))`;
+
+        const keyboardPanel = document.getElementById('keyboard');
+
+        if (game === 'valorant') {
+          keyboardPanel.replaceChildren();
+
+          const layout = [
+            ['1', 1, 1, 1],
+            ['2', 1, 2, 1],
+            ['3', 1, 3, 1],
+            ['4', 1, 4, 1],
+            ['Tab', 2, 1, 1],
+            ['~', 2, 2, 1],
+            ['W', 2, 3, 1],
+            ['R', 2, 4, 1],
+            ['Shift', 3, 1, 1],
+            ['A', 3, 2, 1],
+            ['S', 3, 3, 1],
+            ['D', 3, 4, 1],
+            ['Ctrl', 4, 1, 1],
+            ['Space', 4, 2, 3],
+          ];
+          function createKey(label) {
+            const key = document.createElement('div');
+            key.className = 'key';
+            key.dataset.key = label;
+            return key;
+          }
+          for (const [label, row, column, span] of layout) {
+            const key = createKey(label);
+            key.style.gridRow = row;
+            key.style.gridColumn = column + ' / span ' + span;
+            keyboardPanel.append(key);
+          }
+          const skills = document.createElement('div');
+          skills.className = 'val-skills';
+          skills.setAttribute('aria-label', 'Agent skills C Q E X');
+          for (const label of ['C', 'Q', 'E', 'X']) skills.append(createKey(label));
+          keyboardPanel.append(skills);
+        } else {
+          keyboardPanel.innerHTML = leagueMarkup;
+          buildLeagueKeys();
+        }
+
+        appearanceSignature = '';
+        renderCaps();
+      }
+
+      const mouseGraphic = document.getElementById('mouse');
+
+      let previousPoint = null,
+        motionX = 0,
+        motionY = 0,
+        targetX = 0,
+        targetY = 0,
+        motionFrame = 0,
+        motionAt = 0;
+
+      function animateMouse(now) {
+        const smoothing = displayGame === 'valorant' ? 1 : 0.22;
+        motionX += (targetX - motionX) * smoothing;
+        motionY += (targetY - motionY) * smoothing;
+
+        mouseGraphic.style.transform = `translate(${motionX.toFixed(2)}px,${motionY.toFixed(2)}px) scale(var(--mouse-scale,.8))`;
+
+        if (Math.abs(targetX - motionX) + Math.abs(targetY - motionY) > 0.03)
+          motionFrame = requestAnimationFrame(animateMouse);
+        else {
+          motionFrame = 0;
+          motionX = targetX;
+          motionY = targetY;
+          mouseGraphic.style.transform = `translate(${motionX}px,${motionY}px) scale(var(--mouse-scale,.8))`;
+        }
+      }
+
+      function mouseBounds() {
+        if (displayGame !== 'valorant') return { x: 18, y: 9 };
+        const pad = document.getElementById('mouse-pad');
+        const scale = parseFloat(getComputedStyle(board).getPropertyValue('--mouse-scale')) || 0.6;
+        return {
+          x: Math.max(
+            0,
+            ((pad.clientWidth || 180) - (mouseGraphic.offsetWidth || 84) * scale) / 2 - 8,
+          ),
+          y: Math.max(
+            0,
+            ((pad.clientHeight || 180) - (mouseGraphic.offsetHeight || 113) * scale) / 2 - 8,
+          ),
+        };
+      }
+      function moveMouse(event) {
+        if (!Number.isFinite(event.x) || !Number.isFinite(event.y)) return;
+
+        if (previousPoint) {
+          const bounds = mouseBounds();
+          targetX = Math.max(
+            -bounds.x,
+            Math.min(bounds.x, targetX + (event.x - previousPoint.x) * 0.14),
+          );
+          targetY = Math.max(
+            -bounds.y,
+            Math.min(bounds.y, targetY + (event.y - previousPoint.y) * 0.14),
+          );
+          motionAt = performance.now();
+          if (!motionFrame) motionFrame = requestAnimationFrame(animateMouse);
+        }
+
+        previousPoint = { x: event.x, y: event.y };
+      }
+
+      function moveRawMouse(event) {
+        if (!Number.isFinite(event.dx) || !Number.isFinite(event.dy)) return;
+        const bounds = mouseBounds();
+        targetX = Math.max(-bounds.x, Math.min(bounds.x, targetX + event.dx * 0.055));
+        targetY = Math.max(-bounds.y, Math.min(bounds.y, targetY + event.dy * 0.055));
+        motionX = targetX;
+        motionY = targetY;
+        mouseGraphic.style.transform = `translate(${motionX}px,${motionY}px) scale(var(--mouse-scale,.8))`;
+      }
+      function resetMotion() {
+        previousPoint = null;
+      }
+
+      const mouseButtons = {
+          1: document.getElementById('mouse-left'),
+          2: document.getElementById('mouse-right'),
+          3: document.getElementById('mouse-middle'),
+          4: document.getElementById('mouse-side-one'),
+          5: document.getElementById('mouse-side-two'),
+        },
+        mouseTimers = {};
+
+      let wheelTimer = null;
+      function resetWheel() {
+        clearTimeout(wheelTimer);
+        document.getElementById('mouse-scroll-up').classList.remove('active');
+        document.getElementById('mouse-scroll-down').classList.remove('active');
+        document.getElementById('mouse-middle').classList.remove('scrolling');
+      }
+      function flashWheel(direction, sticky = false) {
+        if (direction !== 'up' && direction !== 'down') return;
+        resetWheel();
+        document.getElementById('mouse-scroll-' + direction).classList.add('active');
+        document.getElementById('mouse-middle').classList.add('scrolling');
+        if (!sticky) wheelTimer = setTimeout(resetWheel, 180);
+      }
+      function resetMouse() {
+        resetWheel();
+        resetMotion();
+        for (const button of Object.keys(mouseButtons)) {
+          clearTimeout(mouseTimers[button]);
+          mouseButtons[button].classList.remove('down');
+        }
+      }
+
+      function flashMouse(button) {
+        if (!mouseButtons[button]) return;
+        clearTimeout(mouseTimers[button]);
+        mouseButtons[button].classList.add('down');
+        mouseTimers[button] = setTimeout(() => mouseButtons[button].classList.remove('down'), 160);
+      }
+
+      function buildLeagueKeys() {
+        for (const label of ['1', '2', '3', '4', '5', '6', '7']) {
+          const key = document.createElement('div');
+          key.className = 'key item';
+          key.dataset.key = label;
+          document.getElementById('items').append(key);
+        }
+
+        for (const label of ['Q', 'W', 'E', 'R', 'D', 'F', 'V']) {
+          if (label === 'D') {
+            const gap = document.createElement('div');
+            gap.className = 'gap';
+            document.getElementById('abilities').append(gap);
+          }
+          const key = document.createElement('div');
+          key.className = 'key';
+          key.dataset.key = label;
+          document.getElementById('abilities').append(key);
+        }
+      }
+
+      buildLeagueKeys();
+
+      let valorantAgent = null;
+      async function refreshValorantAgent() {
+        try {
+          const r = await fetch('/valorant-agent');
+          const data = r.ok
+            ? await r.json()
+            : { agent: (await (await fetch('/keyboard-preview.json')).json()).valorantAgent };
+          if (JSON.stringify(data.agent) !== JSON.stringify(valorantAgent)) {
+            valorantAgent = data.agent;
+            renderCaps();
+          }
+        } catch {}
+      }
+      refreshValorantAgent();
+      setInterval(() => {
+        if (displayGame === 'valorant') refreshValorantAgent();
+      }, 2000);
+      let catalog = [],
+        latestSpells = null,
+        latestLoadout = { icons: {}, support: false },
+        appearanceSignature = '';
+
+      function renderCaps() {
+        for (const key of document.querySelectorAll('[data-key]')) {
+          const label = key.dataset.key,
+            spell = displayGame === 'league' ? latestSpells?.[label] : null;
+          let icon = displayGame === 'league' ? latestLoadout.icons?.[label] : null;
+
+          if (/^[1-7]$/.test(label)) icon = null;
+
+          if (label === 'V')
+            icon =
+              displayGame === 'league' && latestLoadout.support
+                ? { src: '/game-icons/item-2055.png', name: 'Control Ward' }
+                : null;
+
+          if (label === 'D' || label === 'F') {
+            const entry = spell
+              ? catalog.find(
+                  (s) =>
+                    s.id === spell.id || s.name.toLowerCase() === (spell.name || '').toLowerCase(),
+                )
+              : null;
+            icon = entry
+              ? { src: '/spell-icons/' + encodeURIComponent(entry.image), name: spell.name }
+              : null;
+          }
+
+          if (displayGame === 'valorant') icon = valorantAgent?.abilities?.[label] || null;
+          key.replaceChildren();
+          key.hidden = displayGame === 'league' && label === 'V' && !latestLoadout.support;
+          key.classList.toggle('has-spell', !!icon);
+          key.title = label + (icon ? ' — ' + icon.name : '');
+
+          if (icon) {
+            const image = document.createElement('img');
+            image.className = 'spell-image';
+            image.alt = icon.name;
+            image.src = icon.src;
+            image.onerror = () => {
+              image.remove();
+              key.classList.remove('has-spell');
+            };
+            key.append(image);
+            const letter = document.createElement('span');
+            letter.className = 'spell-letter';
+            letter.textContent = label;
+            key.append(letter);
+          } else {
+            const letter = document.createElement('span');
+            letter.textContent = label === 'Space' ? 'SPACE' : label.toUpperCase();
+            key.append(letter);
+          }
+        }
+      }
+
+      fetch('/spell-catalog.json')
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          catalog = data?.spells || [];
+          renderCaps();
+        })
+        .catch(() => {});
+
+      function show(state) {
+        useRawMouse = !!state.rawMouse;
+        setGame(state.game === 'valorant' ? 'valorant' : 'league');
+
+        const visible = !!state.visible && (!onlyGame || onlyGame === state.game);
+        board.classList.toggle('visible', visible);
+
+        if (!visible) resetMouse();
+
+        if ('spells' in state) latestSpells = state.spells;
+        if ('loadout' in state) latestLoadout = state.loadout || { icons: {}, support: false };
+
+        const signature = JSON.stringify([latestSpells, latestLoadout]);
+        if (signature !== appearanceSignature) {
+          appearanceSignature = signature;
+          renderCaps();
+        }
+
+        const held = new Set(state.keys || []);
+        for (const key of document.querySelectorAll('[data-key]'))
+          key.classList.toggle('down', held.has(key.dataset.key));
+      }
+
+      renderCaps();
+
+      if (new URLSearchParams(location.search).has('preview'))
+        fetch('/keyboard-preview.json')
+          .then((r) => r.json())
+          .then((loadout) => {
+            show({
+              game: new URLSearchParams(location.search).get('game'),
+              visible: true,
+              keys: ['Q', 'D', '2', 'V'],
+              spells: {
+                D: { id: 'SummonerHaste', name: 'Ghost' },
+                F: { id: 'SummonerFlash', name: 'Flash' },
+              },
+              loadout,
+            });
+            for (const button of Object.values(mouseButtons)) button.classList.add('down');
+            const scrollPreview = new URLSearchParams(location.search).get('scroll');
+            if (scrollPreview) flashWheel(scrollPreview, true);
+          });
+      else {
+        const stream = new EventSource('/keyboard-events');
+        stream.onmessage = (e) => show(JSON.parse(e.data));
+        stream.onerror = () => show({ visible: false, keys: [] });
+
+        const pointer = new EventSource('/events');
+        pointer.onmessage = (e) => {
+          for (const event of JSON.parse(e.data)) {
+            if (
+              event.kind === 'rawmove' &&
+              displayGame === 'valorant' &&
+              board.classList.contains('visible')
+            )
+              moveRawMouse(event);
+            else if (
+              event.kind === 'move' &&
+              board.classList.contains('visible') &&
+              !(displayGame === 'valorant' && useRawMouse)
+            )
+              moveMouse(event);
+            else if (event.kind === 'click' && board.classList.contains('visible'))
+              flashMouse(event.button);
+            else if (event.kind === 'wheel' && board.classList.contains('visible'))
+              flashWheel(event.direction);
+            else if (event.kind === 'leave' || (event.kind === 'state' && !event.enabled))
+              resetMouse();
+          }
+        };
+        pointer.onerror = resetMouse;
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "icons": {},
+  "support": false,
+  "valorantAgent": {
+    "id": "a3bfb853-43b2-7238-a4f1-ad90e9e46bcc",
+    "name": "Reyna",
+    "portrait": "/game-icons/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc-portrait.png",
+    "abilities": {
+      "Q": {
+        "name": "Devour",
+        "src": "/game-icons/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc-Q.png"
+      },
+      "E": {
+        "name": "Dismiss",
+        "src": "/game-icons/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc-E.png"
+      },
+      "C": {
+        "name": "Leer",
+        "src": "/game-icons/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc-C.png"
+      },
+      "X": {
+        "name": "Empress",
+        "src": "/game-icons/a3bfb853-43b2-7238-a4f1-ad90e9e46bcc-X.png"
+      }
+    }
+  }
+}

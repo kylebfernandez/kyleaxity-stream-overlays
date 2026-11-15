@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><title>KyleAxity · Match inputs</title
+  ><style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #061217;
+      color: #d6cba8;
+      font:
+        14px Segoe UI,
+        Arial,
+        sans-serif;
+    }
+    main {
+      max-width: 1120px;
+      margin: 36px auto;
+      padding: 28px;
+      background: linear-gradient(135deg, #10272b, #091b20);
+      border: 1px solid #8d7543;
+      box-shadow: inset 0 0 0 4px #081318;
+    }
+    h1 {
+      font:
+        600 28px Georgia,
+        serif;
+      color: #e3cf99;
+      margin: 8px 0 12px;
+    }
+    p {
+      color: #a4b2b0;
+      line-height: 1.6;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    button,
+    select {
+      background: #152e31;
+      color: #e2c988;
+      border: 1px solid #756139;
+      padding: 9px 18px;
+      cursor: pointer;
+    }
+    button[aria-pressed='true'] {
+      background: #35524b;
+      border-color: #c8aa63;
+    }
+    #stats {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin: 20px 0;
+    }
+    .stat {
+      padding: 16px 8px;
+      border: 1px solid #73603b55;
+      text-align: center;
+      background: #08191d;
+    }
+    .stat strong {
+      display: block;
+      color: #f0e6c8;
+      font-size: 24px;
+    }
+    .stat small {
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16/9;
+      max-height: 440px;
+      object-fit: contain;
+      background: #07171b;
+      margin: 12px 0;
+    }
+    #counts {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+    .chip {
+      padding: 9px 12px;
+      border: 1px solid #665d3b;
+      background: #142a2b;
+    }
+    .chip b {
+      margin-left: 12px;
+      color: #e7dcba;
+    }
+    .eyebrow {
+      color: #9a895e;
+      font-size: 11px;
+      letter-spacing: 2px;
+    }
+    .legend {
+      color: #adb9b3;
+      font-size: 12px;
+    }
+    .yellow {
+      color: #d4db70;
+    }
+    .blue {
+      color: #6cb8ff;
+    }
+    a {
+      color: #c8aa63;
+    }
+    @media (max-width: 750px) {
+      main {
+        margin: 12px;
+        padding: 16px;
+      }
+      #stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    body[data-game='valorant'] {
+      background: #080f17;
+      color: #ece8e1;
+    }
+    body[data-game='valorant'] main {
+      background: linear-gradient(115deg, #0f1923, #182832);
+      border-color: #b0c0c366;
+      border-left: 4px solid #ff4655;
+      box-shadow: none;
+    }
+    body[data-game='valorant'] h1 {
+      font-family:
+        Segoe UI,
+        Arial,
+        sans-serif;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #ece8e1;
+    }
+    body[data-game='valorant'] button,
+    body[data-game='valorant'] select {
+      background: #1e303a;
+      border-color: #bac9c566;
+      color: #ece8e1;
+    }
+    body[data-game='valorant'] button[aria-pressed='true'] {
+      background: #ff4655;
+      border-color: #ff4655;
+      color: #0f1923;
+    }
+    body[data-game='valorant'] .stat,
+    body[data-game='valorant'] .chip {
+      background: #1e303a;
+      border-color: #bac9c533;
+    }
+    body[data-game='valorant'] .stat strong,
+    body[data-game='valorant'] .chip b {
+      color: #ece8e1;
+    }
+    body[data-game='valorant'] .eyebrow {
+      color: #b1c2c4;
+    }
+    body[data-game='valorant'] a {
+      color: #ff8991;
+    }
+  </style>
+  <main>
+    <div class="top">
+      <span class="eyebrow">KYLEAXITY · LOCAL MATCH REVIEW</span
+      ><select id="game" aria-label="Game">
+        <option value="league">League of Legends</option>
+        <option value="valorant">VALORANT</option>
+      </select>
+    </div>
+    <h1 id="heading">Post-game inputs</h1>
+    <p id="info">Loading latest match…</p>
+    <div id="stats"></div>
+    <div class="top">
+      <span class="eyebrow">MOUSE PATH PREVIEW</span>
+      <div>
+        <button id="path" aria-pressed="true">Path</button
+        ><button id="heatmap" aria-pressed="false">Heatmap</button>
+      </div>
+    </div>
+    <canvas id="map" width="960" height="540"></canvas>
+    <div class="legend">
+      <span class="yellow">● Left clicks</span> &nbsp; <span class="blue">● Right clicks</span> ·
+      Path is sampled; click positions are grouped into cells. Heatmap shows sampled activity
+      density.
+    </div>
+    <div id="counts"></div>
+    <p id="limitation"></p>
+    <p>Stored on this PC · Latest match per game · <a href="/control">Overlay controls</a></p>
+  </main>
+  <script src="/path-map.js"></script>
+  <script>
+    let summaries = {},
+      mode = 'path';
+    const params = new URLSearchParams(location.search),
+      game = document.getElementById('game');
+    game.value = params.get('game') === 'valorant' ? 'valorant' : 'league';
+    function render() {
+      document.body.dataset.game = game.value;
+      const summary = summaries[game.value];
+      document.getElementById('heading').textContent =
+        (game.value === 'league' ? 'League of Legends' : 'VALORANT') + ' · Post-game inputs';
+      document.getElementById('info').textContent = summary
+        ? `${summary.preview ? 'PREVIEW · SAMPLE DATA · ' : ''}${summary.partial ? 'Partial capture · ' : ''}${new Date(summary.endedAt).toLocaleString()} · ${Math.round(summary.durationSeconds / 60)} minutes captured`
+        : 'No completed match saved yet. Play a match with the helper running.';
+      const stats = document.getElementById('stats');
+      stats.replaceChildren();
+      if (summary) {
+        for (const [label, value] of [
+          ['APM', summary.apm.toFixed(1)],
+          ['CURSOR TRAVEL', (summary.travelPixels / 1000).toFixed(1) + 'k px'],
+          ['EFFICIENCY', summary.efficiency == null ? '—' : summary.efficiency.toFixed(0) + '%'],
+          ['CLICKS', summary.clicks.toLocaleString()],
+          ['CLICK TEMPO', summary.tempoHz.toFixed(1) + ' Hz'],
+          ['IDLE', Math.round(summary.idleSeconds) + 's'],
+        ]) {
+          const tile = document.createElement('div');
+          tile.className = 'stat';
+          const number = document.createElement('strong');
+          number.textContent = value;
+          const caption = document.createElement('small');
+          caption.textContent = label;
+          tile.append(number, caption);
+          stats.append(tile);
+        }
+      }
+      drawPointerMap(document.getElementById('map'), summary?.pointerMap, mode);
+      const counts = document.getElementById('counts');
+      counts.replaceChildren();
+      for (const [key, value] of Object.entries(summary?.keyCounts || {})) {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.textContent = key;
+        const count = document.createElement('b');
+        count.textContent = value;
+        chip.append(count);
+        counts.append(chip);
+      }
+      document.getElementById('limitation').textContent =
+        game.value === 'valorant'
+          ? 'Valorant locks the cursor during aiming. This map shows screen-cursor movement, not aim direction, accuracy or recoil. Key presses are physical presses, not confirmed ability casts.'
+          : 'Screen coordinates, not locations on the game map. Key presses are physical presses, not confirmed casts. Older matches have no path data; capture a new match to populate this view.';
+    }
+    for (const name of ['path', 'heatmap'])
+      document.getElementById(name).onclick = () => {
+        mode = name;
+        for (const n of ['path', 'heatmap'])
+          document.getElementById(n).setAttribute('aria-pressed', n === mode);
+        render();
+      };
+    game.onchange = render;
+    if (params.has('preview')) {
+      for (const g of ['league', 'valorant'])
+        summaries[g] = {
+          preview: true,
+          game: g,
+          endedAt: Date.now(),
+          durationSeconds: 1860,
+          apm: 212.4,
+          travelPixels: 308200,
+          efficiency: 62,
+          clicks: 3184,
+          tempoHz: 2.4,
+          idleSeconds: 12,
+          keyCounts: { Q: 42, W: 18, E: 31, R: 4, D: 2, F: 3, V: 12, Space: 52, Ctrl: 6, Shift: 4 },
+          pointerMap: samplePointerMap(),
+        };
+      render();
+    } else {
+      async function update() {
+        try {
+          const r = await fetch('/last-summary');
+          summaries = await r.json();
+          render();
+        } catch {
+          document.getElementById('info').textContent =
+            'Helper is unavailable. Start the overlay helper and reload.';
+        }
+      }
+      update();
+      setInterval(update, 15000);
+    }
+  </script>
+</html>

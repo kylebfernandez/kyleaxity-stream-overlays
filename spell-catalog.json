@@ -1,0 +1,175 @@
+{
+  "version": "16.22.1",
+  "spells": [
+    {
+      "id": "SummonerBarrier",
+      "name": "Barrier",
+      "image": "SummonerBarrier.png"
+    },
+    {
+      "id": "SummonerBarrier_Jade",
+      "name": "Barrier",
+      "image": "SummonerBarrier_Jade.png"
+    },
+    {
+      "id": "SummonerBattleCry_Jade",
+      "name": "Surge",
+      "image": "SummonerBattleCry_Jade.png"
+    },
+    {
+      "id": "SummonerBoost",
+      "name": "Cleanse",
+      "image": "SummonerBoost.png"
+    },
+    {
+      "id": "SummonerBoost_Jade",
+      "name": "Cleanse",
+      "image": "SummonerBoost_Jade.png"
+    },
+    {
+      "id": "SummonerCherryFlash",
+      "name": "Flash",
+      "image": "SummonerCherryFlash.png"
+    },
+    {
+      "id": "SummonerCherryHold",
+      "name": "Flee",
+      "image": "SummonerCherryHold.png"
+    },
+    {
+      "id": "SummonerClairvoyance_Jade",
+      "name": "Clairvoyance",
+      "image": "SummonerClairvoyance_Jade.png"
+    },
+    {
+      "id": "SummonerDot",
+      "name": "Ignite",
+      "image": "SummonerDot.png"
+    },
+    {
+      "id": "SummonerDot_Jade",
+      "name": "Ignite",
+      "image": "SummonerDot_Jade.png"
+    },
+    {
+      "id": "SummonerExhaust",
+      "name": "Exhaust",
+      "image": "SummonerExhaust.png"
+    },
+    {
+      "id": "SummonerExhaust_Jade",
+      "name": "Exhaust",
+      "image": "SummonerExhaust_Jade.png"
+    },
+    {
+      "id": "SummonerFlash",
+      "name": "Flash",
+      "image": "SummonerFlash.png"
+    },
+    {
+      "id": "SummonerFlash_Jade",
+      "name": "Flash",
+      "image": "SummonerFlash_Jade.png"
+    },
+    {
+      "id": "SummonerFortify_Jade",
+      "name": "Fortify",
+      "image": "SummonerFortify_Jade.png"
+    },
+    {
+      "id": "SummonerHaste",
+      "name": "Ghost",
+      "image": "SummonerHaste.png"
+    },
+    {
+      "id": "SummonerHaste_Jade",
+      "name": "Ghost",
+      "image": "SummonerHaste_Jade.png"
+    },
+    {
+      "id": "SummonerHeal",
+      "name": "Heal",
+      "image": "SummonerHeal.png"
+    },
+    {
+      "id": "SummonerHeal_Jade",
+      "name": "Heal",
+      "image": "SummonerHeal_Jade.png"
+    },
+    {
+      "id": "SummonerMana",
+      "name": "Clarity",
+      "image": "SummonerMana.png"
+    },
+    {
+      "id": "SummonerMana_Jade",
+      "name": "Clarity",
+      "image": "SummonerMana_Jade.png"
+    },
+    {
+      "id": "SummonerPoroRecall",
+      "name": "To the King!",
+      "image": "SummonerPoroRecall.png"
+    },
+    {
+      "id": "SummonerPoroThrow",
+      "name": "Poro Toss",
+      "image": "SummonerPoroThrow.png"
+    },
+    {
+      "id": "SummonerRally_Jade",
+      "name": "Rally",
+      "image": "SummonerRally_Jade.png"
+    },
+    {
+      "id": "SummonerRevive_Jade",
+      "name": "Revive",
+      "image": "SummonerRevive_Jade.png"
+    },
+    {
+      "id": "SummonerSmite",
+      "name": "Smite",
+      "image": "SummonerSmite.png"
+    },
+    {
+      "id": "SummonerSmite_Jade",
+      "name": "Smite",
+      "image": "SummonerSmite_Jade.png"
+    },
+    {
+      "id": "SummonerSnowURFSnowball_Mark",
+      "name": "Mark",
+      "image": "SummonerSnowURFSnowball_Mark.png"
+    },
+    {
+      "id": "SummonerSnowball",
+      "name": "Mark",
+      "image": "SummonerSnowball.png"
+    },
+    {
+      "id": "SummonerSpell_Promote_Jade",
+      "name": "Promote",
+      "image": "SummonerSpell_Promote_Jade.png"
+    },
+    {
+      "id": "SummonerTeleport",
+      "name": "Teleport",
+      "image": "SummonerTeleport.png"
+    },
+    {
+      "id": "SummonerTeleport_Jade",
+      "name": "Teleport",
+      "image": "SummonerTeleport_Jade.png"
+    },
+    {
+      "id": "Summoner_UltBookPlaceholder",
+      "name": "Placeholder",
+      "image": "Summoner_UltBookPlaceholder.png"
+    },
+    {
+      "id": "Summoner_UltBookSmitePlaceholder",
+      "name": "Placeholder and Attack-Smite",
+      "image": "Summoner_UltBookSmitePlaceholder.png"
+    }
+  ]
+}

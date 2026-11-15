@@ -1,0 +1,200 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Stream mouse trail</title>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="trail" width="1920" height="1080"></canvas>
+    <script>
+      const canvas = document.getElementById('trail'),
+        ctx = canvas.getContext('2d');
+
+      // League cursor trail and click rings.
+
+      const style = {
+        path: '#B5D995',
+        left: '#D4DB70',
+        right: '#6CB8FF',
+        stroke: 0.5,
+        bleed: 0.5,
+        fade: 500,
+        clickSize: 0.75,
+      };
+
+      const points = [],
+        clicks = [];
+      let previous = null,
+        enabled = true;
+
+      const params = new URLSearchParams(location.search),
+        demo = params.has('demo');
+
+      let gameTrailEnabled = demo;
+
+      // Read the existing status endpoint so changing styles does not restart match tracking.
+
+      if (!demo) {
+        let reading = false;
+
+        async function syncGame() {
+          if (reading) return;
+          reading = true;
+          try {
+            const response = await fetch('/health');
+            if (response.ok) {
+              const health = await response.json(),
+                kind = health.captureBounds?.kind;
+              gameTrailEnabled =
+                !!kind?.startsWith('league') && health.gameSettings.league !== false;
+              if (!gameTrailEnabled) {
+                points.length = 0;
+                clicks.length = 0;
+                previous = null;
+              }
+            }
+          } catch {
+          } finally {
+            reading = false;
+          }
+        }
+
+        syncGame();
+        setInterval(syncGame, 500);
+      }
+
+      function accept(batch) {
+        for (const e of batch) {
+          if (e.kind === 'state') {
+            enabled = e.enabled;
+            points.length = 0;
+            clicks.length = 0;
+            previous = null;
+            continue;
+          }
+
+          if (e.kind === 'leave') {
+            previous = null;
+            continue;
+          }
+
+          if (
+            !enabled ||
+            !gameTrailEnabled ||
+            !['move', 'click'].includes(e.kind) ||
+            !Number.isFinite(e.x) ||
+            !Number.isFinite(e.y)
+          )
+            continue;
+
+          const p = { x: e.x, y: e.y, t: performance.now() };
+
+          if (e.kind === 'click') clicks.push({ ...p, button: e.button });
+          else {
+            points.push({ ...p, from: previous });
+            previous = p;
+          }
+        }
+      }
+
+      if (!demo) {
+        const stream = new EventSource('/events');
+        stream.onmessage = (e) => accept(JSON.parse(e.data));
+        stream.onerror = () => {
+          previous = null;
+          points.length = 0;
+          clicks.length = 0;
+        };
+      }
+
+      function render(now) {
+        ctx.clearRect(0, 0, 1920, 1080);
+
+        while (points.length && now - points[0].t > style.fade) points.shift();
+
+        while (clicks.length && now - clicks[0].t > 500) clicks.shift();
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        for (const p of points) {
+          if (!p.from || p.t - p.from.t > 180) continue;
+
+          const a = Math.max(0, 1 - (now - p.t) / style.fade);
+
+          const angle = Math.atan2(p.y - p.from.y, p.x - p.from.x);
+
+          const width = style.stroke * (1.2 + 4 * Math.abs(Math.sin(angle - Math.PI / 4)));
+
+          ctx.globalAlpha = a;
+
+          ctx.beginPath();
+          ctx.moveTo(p.from.x, p.from.y);
+          ctx.lineTo(p.x, p.y);
+
+          ctx.shadowColor = style.path;
+          ctx.shadowBlur = style.bleed * 4;
+
+          ctx.strokeStyle = style.path;
+          ctx.lineWidth = width;
+          ctx.stroke();
+        }
+
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+
+        for (const p of clicks) {
+          const age = (now - p.t) / 500,
+            a = Math.max(0, 1 - age),
+            r = style.clickSize * (12 + age * 30);
+
+          ctx.globalAlpha = a;
+
+          ctx.beginPath();
+
+          ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+
+          ctx.strokeStyle = '#070910';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          ctx.strokeStyle = p.button === 2 ? style.right : style.left;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+
+        ctx.globalAlpha = 1;
+
+        if (demo) {
+          const x = 960 + Math.cos(now / 450) * 270,
+            y = 540 + Math.sin(now / 300) * 150;
+          accept([{ kind: 'move', x, y }]);
+          if (Math.floor(now / 300) !== Math.floor((now - 17) / 300))
+            accept([{ kind: 'click', x, y, button: Math.floor(now / 300) % 2 ? 1 : 2 }]);
+        }
+
+        requestAnimationFrame(render);
+      }
+
+      requestAnimationFrame(render);
+    </script>
+  </body>
+</html>

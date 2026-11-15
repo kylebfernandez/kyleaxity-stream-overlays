@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mouse overlay toggle</title>
+    <style>
+      body {
+        margin: 0;
+        background: #11141b;
+        color: #f1f4fc;
+        font: 17px system-ui;
+        display: grid;
+        min-height: 100vh;
+        place-items: center;
+      }
+      main {
+        max-width: 470px;
+        padding: 36px;
+      }
+      h1 {
+        font-size: 28px;
+      }
+      p {
+        line-height: 1.6;
+        color: #bdc7db;
+      }
+      button {
+        font: 600 18px system-ui;
+        background: #a9c7ff;
+        color: #101727;
+        padding: 16px 28px;
+        border: 0;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:disabled {
+        opacity: 0.6;
+      }
+      kbd {
+        background: #262e3d;
+        border-radius: 4px;
+        padding: 3px 6px;
+      }
+      #status {
+        font-weight: 600;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Stream mouse overlay</h1>
+      <p id="status" role="status" aria-live="polite">Connecting…</p>
+      <button id="toggle" disabled>Connecting…</button>
+      <p>
+        Controls the League trail and the keyboard/mouse displays for both games in OBS. Your screen
+        shows only the League post-game summary.
+      </p>
+      <p>
+        In-game toggle: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F9</kbd> while a supported game is
+        focused.
+      </p>
+    </main>
+    <section
+      style="border-top: 1px solid #343d50; margin: 20px 36px; padding-top: 20px; max-width: 470px"
+    >
+      <h2>Valorant agent icons</h2>
+      <p>
+        Select your current agent. This is a manual selection; it is not detected from the game.
+      </p>
+      <select
+        id="valorant-agent"
+        aria-label="Valorant agent"
+        style="
+          width: 100%;
+          padding: 12px;
+          background: #1e303a;
+          color: #ece8e1;
+          border: 1px solid #ff4655;
+        "
+      >
+        <option>Loading agents…</option>
+      </select>
+      <p id="agent-status" role="status"></p>
+      <h2>Post-game summary</h2>
+      <p>
+        <a href="/review.html" style="color: #d7bf7c">Open match review · Paths and heatmaps</a>
+      </p>
+      <p>
+        League: stream and desktop. Valorant: stream. Appears for 25 seconds after a match. Stats
+        are collected even when the trail toggle is off.
+      </p>
+      <p id="match-status" role="status"></p>
+      <button id="preview">Test League popup</button
+      ><button id="desktop-preview" style="margin-top: 10px">Test desktop only</button
+      ><button id="replay" style="margin-top: 10px">Show latest match again</button
+      ><button id="hide" style="margin-top: 10px">Hide summary</button>
+      <p id="summary-result" role="status"></p>
+    </section>
+    <script>
+      const agentSelect = document.getElementById('valorant-agent'),
+        agentStatus = document.getElementById('agent-status');
+      Promise.all([
+        fetch('/valorant-agents.json').then((r) => r.json()),
+        fetch('/valorant-agent').then((r) => r.json()),
+      ])
+        .then(([catalog, selection]) => {
+          agentSelect.replaceChildren();
+          for (const agent of catalog) {
+            const option = document.createElement('option');
+            option.value = agent.id;
+            option.textContent = agent.name;
+            agentSelect.append(option);
+          }
+          agentSelect.value = selection.agent?.id || '';
+          agentStatus.textContent = selection.agent
+            ? 'Selected: ' + selection.agent.name
+            : 'Choose your agent.';
+        })
+        .catch(() => {
+          agentStatus.textContent = 'Could not load agent choices.';
+          agentSelect.disabled = true;
+        });
+      agentSelect.onchange = async () => {
+        agentSelect.disabled = true;
+        try {
+          const r = await fetch('/valorant-agent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Overlay-Control': '1' },
+            body: JSON.stringify({ agentId: agentSelect.value }),
+          });
+          if (!r.ok) throw Error();
+          const data = await r.json();
+          agentStatus.textContent =
+            'Selected: ' + data.agent.name + ' · OBS updates automatically.';
+        } catch {
+          agentStatus.textContent = 'Could not save agent selection. Reload and try again.';
+        } finally {
+          agentSelect.disabled = false;
+        }
+      };
+
+      const button = document.getElementById('toggle'),
+        status = document.getElementById('status');
+      function show(enabled) {
+        status.textContent = enabled ? 'Overlay is ON' : 'Overlay is OFF';
+        button.textContent = enabled ? 'Turn OFF' : 'Turn ON';
+        button.disabled = false;
+        button.setAttribute('aria-pressed', String(enabled));
+      }
+      async function refresh() {
+        try {
+          const r = await fetch('/health');
+          if (!r.ok) throw Error();
+          const h = await r.json();
+          show(h.enabled);
+          document.getElementById('match-status').textContent = h.activeMatches?.length
+            ? 'Capturing: ' + h.activeMatches.join(', ')
+            : 'Waiting for the next match.';
+        } catch {
+          button.disabled = true;
+          status.textContent = 'Overlay helper is offline. Start the overlay helper to reconnect.';
+        }
+      }
+      button.onclick = async () => {
+        button.disabled = true;
+        try {
+          const r = await fetch('/toggle', {
+            method: 'POST',
+            headers: { 'X-Overlay-Control': '1' },
+          });
+          if (!r.ok) throw Error();
+          show((await r.json()).enabled);
+        } catch {
+          await refresh();
+        }
+      };
+      refresh();
+      setInterval(refresh, 1000);
+      for (const [id, route] of [
+        ['preview', 'summary-preview'],
+        ['replay', 'summary-replay'],
+        ['hide', 'summary-hide'],
+        ['desktop-preview', 'desktop-preview'],
+      ])
+        document.getElementById(id).onclick = async () => {
+          try {
+            const r = await fetch('/' + route, {
+              method: 'POST',
+              headers: { 'X-Overlay-Control': '1' },
+            });
+            document.getElementById('summary-result').textContent = r.ok ? 'Done.' : await r.text();
+          } catch {
+            document.getElementById('summary-result').textContent = 'Helper is offline.';
+          }
+        };
+    </script>
+  </body>
+</html>

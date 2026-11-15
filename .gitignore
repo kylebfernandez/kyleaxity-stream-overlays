@@ -1,0 +1,16 @@
+node_modules/
+*.exe
+*.node
+*.log
+.env
+.env.*
+!.env.example
+game-icons/
+spell-icons/
+valorant-icons/
+match-summaries.json
+desktop-status.json
+enabled-state.json
+game-settings.json
+valorant-agent.json
+*.zip

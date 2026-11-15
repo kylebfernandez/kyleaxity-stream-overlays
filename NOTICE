@@ -1,0 +1,16 @@
+KyleAxity Stream Overlays
+
+Original project source is provided under the MIT license.
+
+uiohook-napi is Copyright (c) 2020 Alexander Drozdov and licensed under MIT.
+Its native dependencies carry their own licenses; keep the notices distributed
+with the npm package.
+
+League of Legends, VALORANT, character names, ability icons and related artwork
+belong to Riot Games. Downloaded game artwork and metadata are not covered by
+this project's MIT license. This project is not affiliated with, endorsed by
+or sponsored by Riot Games.
+
+Valorant-API supplies public agent/ability metadata and artwork links. AULA is
+a third-party trademark; the mouse illustration is a stylized honeycomb design,
+not official product artwork.
