@@ -1,8 +1,8 @@
 {
-  "name": "kyleaxity-stream-overlays",
+  "name": "kyleaxity-input-companion",
   "version": "1.0.0",
   "private": true,
-  "description": "Local keyboard, mouse and post-game overlays for OBS on Windows.",
+  "description": "Local League of Legends and VALORANT input statistics, match review and optional OBS displays for Windows.",
   "license": "MIT",
   "engines": {
     "node": ">=20"

@@ -1,6 +1,6 @@
-# KyleAxity Stream Overlays
+# KyleAxity Input Companion
 
-Keyboard, mouse and post-game overlays for League of Legends and Valorant in OBS. Runs locally on Windows.
+A local input companion for League of Legends and VALORANT on Windows. Review your clicks, key presses, cursor paths and activity heatmaps after a match, or display live inputs in OBS.
 
 ## Features
 
@@ -69,6 +69,16 @@ npm run build
 ```
 
 Web pages and the Node server are in the project root. Windows helper sources are in `native/`. Do not commit local match files, cached artwork or compiled binaries.
+
+## Legal and privacy
+
+This is a free, independent community project. OBS displays are one feature; the companion also collects local match input statistics and provides post-game review.
+
+See [Privacy](PRIVACY.md), [Terms of use](TERMS.md) and [third-party notices](NOTICE). Riot artwork is not covered by the source code's MIT license.
+
+KyleAxity Input Companion isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
+
+Riot's [Legal Jibber Jabber](https://www.riotgames.com/en/legal) describes its fan-content rules. Its [developer policies](https://developer.riotgames.com/policies/general) separately require product registration and review. These notices do not establish registration, permission to distribute game assets, or anti-cheat approval. Those requirements must be resolved through Riot's Developer Portal before treating this as an approved public integration.
 
 ## Credits
 
